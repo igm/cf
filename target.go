@@ -40,13 +40,7 @@ func Login(targetUrl, username, pass string) (*Target, error) {
 	decoder := json.NewDecoder(resp.Body)
 	defer resp.Body.Close()
 
-	var info struct {
-		Name                  string `json:"name"`
-		Version               int    `json:"version"`
-		Description           string `json:"description"`
-		AuthorizationEndpoint string `json:"authorization_endpoint"`
-		ApiVersion            string `json:"api_version"`
-	}
+	var info Info
 
 	err = decoder.Decode(&info)
 	if err != nil {
@@ -110,4 +104,40 @@ func getToken(target *Target, values url.Values) error {
 	target.AccessToken = oauthResponse.AccessToken
 	target.RefreshToken = oauthResponse.RefreshToken
 	return err
+}
+
+type Info struct {
+	Name                  string `json:"name"`
+	Build                 string `json:"build"`
+	Support               string `json:"support"`
+	Version               int    `json:"version"`
+	Description           string `json:"description"`
+	AuthorizationEndpoint string `json:"authorization_endpoint"`
+	ApiVersion            string `json:"api_version"`
+}
+
+func (target *Target) Info() (info Info, err error) {
+	infoUrl := fmt.Sprintf("%s/v2/info", target.TargetUrl)
+	req, err := http.NewRequest("GET", infoUrl, nil)
+	if err != nil {
+		return
+	}
+	traceReq(req)
+
+	resp, err := HttpClient.Do(req)
+	if err != nil {
+		return
+	}
+	traceResp(resp)
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		err = errors.New(resp.Status)
+		return
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	defer resp.Body.Close()
+
+	err = decoder.Decode(&info)
+	return
 }
