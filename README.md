@@ -1,4 +1,4 @@
-# Cloud Founry Interaction Library
+# Cloud Founry Interaction Library [![Build Status](https://travis-ci.org/igm/cf.png?branch=master)](https://travis-ci.org/igm/cf)
 
 CF Go package makes it easier to interact with Cloud Foundry v2 instances. It provides higher level API to perform basic
 actions over REST API. 
