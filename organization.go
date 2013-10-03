@@ -11,9 +11,10 @@ type (
 		Guid string `json:"guid"`
 	}
 	orgEntity struct {
-		Name   string  `json:"name"`
-		Status string  `json:"status"`
-		Spaces []Space `json:"spaces"`
+		Name    string   `json:"name"`
+		Status  string   `json:"status"`
+		Spaces  []Space  `json:"spaces"`
+		Domains []Domain `json:"domains"`
 	}
 )
 

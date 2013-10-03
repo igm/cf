@@ -20,6 +20,8 @@ type Domain struct {
 	domainEntity   `json:"entity"`
 }
 
+func (d Domain) String() string { return fmt.Sprint(d.Name) }
+
 // GetDomains returns a slice of registered domains for given space
 func (target *Target) DomainsGet(spaceGUID string) (domains []Domain, err error) {
 	url := fmt.Sprintf("%s/v2/spaces/%s/domains", target.TargetUrl, spaceGUID)

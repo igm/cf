@@ -47,14 +47,13 @@ type App struct {
 func (a App) String() string { return fmt.Sprintf("%s", a.Name) }
 
 func (target *Target) AppCreate(app *NewApp) (ret *App, err error) {
-
 	body, err := json.Marshal(app)
 	if err != nil {
 		return
 	}
 
 	url := fmt.Sprintf("%s/v2/apps", target.TargetUrl)
-	req, _ := http.NewRequest("POST", url, bytes.NewReader(body))
+	req, _ := http.NewRequest("POST", url, closeReader{bytes.NewReader(body)})
 	req.Header.Set("content-type", "application/json")
 
 	resp, err := target.sendRequest(req)
@@ -151,7 +150,7 @@ func (target *Target) appState(appGUID string, state string) (err error) {
 	}
 
 	url := fmt.Sprintf("%s/v2/apps/%s", target.TargetUrl, appGUID)
-	req, _ := http.NewRequest("PUT", url, bytes.NewReader(body))
+	req, _ := http.NewRequest("PUT", url, closeReader{bytes.NewReader(body)})
 	req.Header.Set("content-type", "application/json")
 	_, err = target.sendRequest(req)
 	return

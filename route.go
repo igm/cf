@@ -52,7 +52,7 @@ func (target *Target) RouteCreate(host, domainGUID, spaceGUID string) (err error
 	if err != nil {
 		return
 	}
-	req, _ := http.NewRequest("POST", url, bytes.NewReader(body))
+	req, _ := http.NewRequest("POST", url, closeReader{bytes.NewReader(body)})
 
 	_, err = target.sendRequest(req)
 	return
