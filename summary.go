@@ -12,7 +12,7 @@ type Summary struct {
 	Services []Service `json:"services"`
 }
 
-// Summary returns a Space summary
+// Summary returns a Space summary, not really sure if its usefull
 func (target *Target) Summary(spaceGUID string) (summary *Summary, err error) {
 	url := fmt.Sprintf("%s/v2/spaces/%s/summary", target.TargetUrl, spaceGUID)
 	req, err := http.NewRequest("GET", url, nil)

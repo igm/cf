@@ -14,12 +14,16 @@ type routeMetadata struct {
 type routeEntity struct {
 	Host   string `json:"host"`
 	Domain Domain `json:"domain"`
+	Space  Space  `json:"space"`
+	Apps   []App  `json:"apps"`
 }
 
 type Route struct {
 	routeMetadata `json:"metadata"`
 	routeEntity   `json:"entity"`
 }
+
+func (r Route) String() string { return fmt.Sprintf("%s.%s", r.Host, r.Domain.Name) }
 
 func (target *Target) RoutesGet() (routes []Route, err error) {
 	url := fmt.Sprintf("%s/v2/routes?inline-relations-depth=1", target.TargetUrl)

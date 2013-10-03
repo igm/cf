@@ -22,16 +22,29 @@ type NewApp struct {
 	StackGUID *string `json:"stack_guid"`
 }
 
-type Url string
-type App struct {
-	NewApp
-	Guid      string `json:"guid,omitempty"`
-	State     string `json:"state,omitempty"`
-	Buildpack string `json:"buildpack"`
-	Command   string `json:"command"`
-	StackGUID string `json:"stack_guid"`
-	Urls      []Url  `json:"urls,omitempty"`
+type appMetadata struct {
+	Guid string `json:"guid"`
 }
+
+type appEntity struct {
+	SpaceGUID string  `json:"space_guid"`
+	Name      string  `json:"name"`
+	Instances int     `json:"instances"`
+	Memory    int     `json:"memory"`
+	State     string  `json:"state"`
+	Buildpack string  `json:"buildpack"`
+	Command   string  `json:"command"`
+	StackGUID string  `json:"stack_guid"`
+	Routes    []Route `json:"routes"`
+	Space     Space   `json:"space"`
+}
+
+type App struct {
+	appMetadata `json:"metadata"`
+	appEntity   `json:"entity"`
+}
+
+func (a App) String() string { return fmt.Sprintf("%s", a.Name) }
 
 func (target *Target) AppCreate(app *NewApp) (ret *App, err error) {
 
@@ -50,12 +63,7 @@ func (target *Target) AppCreate(app *NewApp) (ret *App, err error) {
 	}
 
 	decoder := json.NewDecoder(resp.Body)
-	response := new(struct {
-		Entity App `json:"entity"`
-	})
-
-	err = decoder.Decode(&response)
-	ret = &response.Entity
+	err = decoder.Decode(&ret)
 	return
 }
 
@@ -156,9 +164,48 @@ func (target *Target) AppDelete(appGUID string) (err error) {
 	return
 }
 
+func (target *Target) AppsGet() (apps []App, err error) {
+	url := fmt.Sprintf("%s/v2/apps?inline-relations-depth=2", target.TargetUrl)
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, err := target.sendRequest(req)
+	if err != nil {
+		return
+	}
+	decoder := json.NewDecoder(resp.Body)
+	var response struct {
+		Apps []App `json:"resources"`
+	}
+	err = decoder.Decode(&response)
+	apps = response.Apps
+	return
+}
+
 func (target *Target) AppAddRoute(appGUID, routeGUID string) (err error) {
 	url := fmt.Sprintf("%s/v2/apps/%s/routes/%s", target.TargetUrl, appGUID, routeGUID)
 	req, _ := http.NewRequest("PUT", url, nil)
 	_, err = target.sendRequest(req)
+	return
+}
+
+func (target *Target) AppDeleteRoute(appGUID, routeGUID string) (err error) {
+	url := fmt.Sprintf("%s/v2/apps/%s/routes/%s", target.TargetUrl, appGUID, routeGUID)
+	req, _ := http.NewRequest("DELETE", url, nil)
+	_, err = target.sendRequest(req)
+	return
+}
+
+func (target *Target) AppRoutesGet(appGUID string) (routes []Route, err error) {
+	url := fmt.Sprintf("%s/v2/apps/%s/routes?inline-relations-depth=1", target.TargetUrl, appGUID)
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, err := target.sendRequest(req)
+	if err != nil {
+		return
+	}
+	decoder := json.NewDecoder(resp.Body)
+	var response struct {
+		Routes []Route `json:"resources"`
+	}
+	err = decoder.Decode(&response)
+	routes = response.Routes
 	return
 }

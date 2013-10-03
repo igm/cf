@@ -11,7 +11,8 @@ type spaceMetadata struct {
 }
 
 type spaceEntity struct {
-	Name string `json:"name"`
+	Name         string       `json:"name"`
+	Organization Organization `json:"organization"`
 }
 
 type Space struct {
