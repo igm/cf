@@ -24,7 +24,7 @@ type Route struct {
 func (target *Target) RoutesGet() (routes []Route, err error) {
 	url := fmt.Sprintf("%s/v2/routes?inline-relations-depth=1", target.TargetUrl)
 	req, _ := http.NewRequest("GET", url, nil)
-	resp, err := sendRequest(req, target)
+	resp, err := target.sendRequest(req)
 	if err != nil {
 		return
 	}
@@ -50,13 +50,13 @@ func (target *Target) RouteCreate(host, domainGUID, spaceGUID string) (err error
 	}
 	req, _ := http.NewRequest("POST", url, bytes.NewReader(body))
 
-	_, err = sendRequest(req, target)
+	_, err = target.sendRequest(req)
 	return
 }
 
 func (target *Target) RouteDelete(routeGUID string) (err error) {
 	url := fmt.Sprintf("%s/v2/routes/%s", target.TargetUrl, routeGUID)
 	req, _ := http.NewRequest("DELETE", url, nil)
-	_, err = sendRequest(req, target)
+	_, err = target.sendRequest(req)
 	return
 }

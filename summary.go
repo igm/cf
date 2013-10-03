@@ -19,7 +19,7 @@ func (target *Target) Summary(spaceGUID string) (summary *Summary, err error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := sendRequest(req, target)
+	resp, err := target.sendRequest(req)
 	if err != nil {
 		return nil, err
 	}

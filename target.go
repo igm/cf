@@ -13,46 +13,25 @@ import (
 // Target is the centra structure of this library. All the API remote operatins are performed on Target
 type Target struct {
 	TargetUrl             string
+	Username              string
 	AuthorizationEndpoint string
 	AccessToken           string
 	RefreshToken          string
 }
 
-func Login(targetUrl, username, pass string) (*Target, error) {
-	infoUrl := fmt.Sprintf("%s/v2/info", targetUrl)
-	req, err := http.NewRequest("GET", infoUrl, nil)
+func NewTarget(url string) *Target {
+	return &Target{TargetUrl: url}
+}
+
+func (target *Target) Login(username, pass string) error {
+	info, err := target.Info()
 	if err != nil {
-		return nil, err
-	}
-	traceReq(req)
-
-	resp, err := HttpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	traceResp(resp)
-
-	if resp.StatusCode >= http.StatusBadRequest {
-		err = errors.New(resp.Status)
-		return nil, err
+		return err
 	}
 
-	decoder := json.NewDecoder(resp.Body)
-	defer resp.Body.Close()
-
-	var info Info
-
-	err = decoder.Decode(&info)
-	if err != nil {
-		return nil, err
-	}
-
-	target := &Target{
-		TargetUrl:             targetUrl,
-		AuthorizationEndpoint: info.AuthorizationEndpoint,
-	}
-
-	return target, getToken(target, url.Values{
+	target.AuthorizationEndpoint = info.AuthorizationEndpoint
+	target.Username = username
+	return target.getToken(url.Values{
 		"grant_type": {"password"},
 		"scope":      {},
 		"username":   {username},
@@ -60,15 +39,21 @@ func Login(targetUrl, username, pass string) (*Target, error) {
 	})
 }
 
-func refreshToken(target *Target) error {
-	return getToken(target, url.Values{
+func (target *Target) Logout() {
+	target.Username = ""
+	target.AccessToken = ""
+	target.RefreshToken = ""
+}
+
+func (target *Target) refreshToken() error {
+	return target.getToken(url.Values{
 		"grant_type":    {"refresh_token"},
 		"refresh_token": {target.RefreshToken},
 		"scope":         {},
 	})
 }
 
-func getToken(target *Target, values url.Values) error {
+func (target *Target) getToken(values url.Values) error {
 	body := strings.NewReader(values.Encode())
 	url := fmt.Sprintf("%s/oauth/token", target.AuthorizationEndpoint)
 	req, _ := http.NewRequest("POST", url, body)

@@ -44,7 +44,7 @@ func (target *Target) AppCreate(app *NewApp) (ret *App, err error) {
 	req, _ := http.NewRequest("POST", url, bytes.NewReader(body))
 	req.Header.Set("content-type", "application/json")
 
-	resp, err := sendRequest(req, target)
+	resp, err := target.sendRequest(req)
 	if err != nil {
 		return
 	}
@@ -123,7 +123,7 @@ func (target *Target) appPush(appGUID string, reader io.Reader) (err error) {
 	req, _ := http.NewRequest("PUT", url, body)
 	req.Header.Set("content-type", fmt.Sprintf("multipart/form-data; boundary=%s", boundary))
 
-	_, err = sendRequest(req, target)
+	_, err = target.sendRequest(req)
 	if err != nil {
 		return
 	}
@@ -145,20 +145,20 @@ func (target *Target) appState(appGUID string, state string) (err error) {
 	url := fmt.Sprintf("%s/v2/apps/%s", target.TargetUrl, appGUID)
 	req, _ := http.NewRequest("PUT", url, bytes.NewReader(body))
 	req.Header.Set("content-type", "application/json")
-	_, err = sendRequest(req, target)
+	_, err = target.sendRequest(req)
 	return
 }
 
 func (target *Target) AppDelete(appGUID string) (err error) {
 	url := fmt.Sprintf("%s/v2/apps/%s", target.TargetUrl, appGUID)
 	req, _ := http.NewRequest("DELETE", url, nil)
-	_, err = sendRequest(req, target)
+	_, err = target.sendRequest(req)
 	return
 }
 
 func (target *Target) AppAddRoute(appGUID, routeGUID string) (err error) {
 	url := fmt.Sprintf("%s/v2/apps/%s/routes/%s", target.TargetUrl, appGUID, routeGUID)
 	req, _ := http.NewRequest("PUT", url, nil)
-	_, err = sendRequest(req, target)
+	_, err = target.sendRequest(req)
 	return
 }

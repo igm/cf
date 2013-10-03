@@ -9,7 +9,7 @@ import (
 // HttpClient used for HTTP Requests. Replace with different http client if needed.
 var HttpClient = http.DefaultClient
 
-func sendRequest(req *http.Request, target *Target) (resp *http.Response, err error) {
+func (target *Target) sendRequest(req *http.Request) (resp *http.Response, err error) {
 	req.Header.Set("authorization", "bearer "+target.AccessToken)
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("User-Agent", "cf90")
@@ -24,8 +24,8 @@ func sendRequest(req *http.Request, target *Target) (resp *http.Response, err er
 		if seaker, ok := req.Body.(io.Seeker); ok {
 			seaker.Seek(0, 0)
 		}
-		if err = refreshToken(target); err == nil {
-			return sendRequest(req, target)
+		if err = target.refreshToken(); err == nil {
+			return target.sendRequest(req)
 		}
 		return
 	}

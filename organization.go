@@ -25,7 +25,7 @@ type Organization struct {
 func (target *Target) OrganizationsGet() (orgs []Organization, err error) {
 	url := fmt.Sprintf("%s/v2/organizations", target.TargetUrl)
 	req, _ := http.NewRequest("GET", url, nil)
-	resp, err := sendRequest(req, target)
+	resp, err := target.sendRequest(req)
 	if err != nil {
 		return nil, err
 	}

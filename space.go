@@ -22,7 +22,7 @@ type Space struct {
 func (target *Target) SpacesGet(orgGUID string) (spaces []Space, err error) {
 	url := fmt.Sprintf("%s/v2/organizations/%s/spaces", target.TargetUrl, orgGUID)
 	req, _ := http.NewRequest("GET", url, nil)
-	resp, err := sendRequest(req, target)
+	resp, err := target.sendRequest(req)
 	if err != nil {
 		return nil, err
 	}
