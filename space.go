@@ -20,7 +20,9 @@ type Space struct {
 	spaceEntity   `json:"entity"`
 }
 
-func (target *Target) SpacesGet(orgGUID string) (spaces []Space, err error) {
+func (s Space) String() string { return fmt.Sprint(s.Name) }
+
+func (target *Target) SpacesGet() (spaces []Space, err error) {
 	url := fmt.Sprintf("%s/v2/spaces?inline-relations-depth=1", target.TargetUrl)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

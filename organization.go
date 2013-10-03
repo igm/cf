@@ -25,7 +25,7 @@ type Organization struct {
 
 // GetOrtanizations returns a slice of all organizations
 func (target *Target) OrganizationsGet() (orgs []Organization, err error) {
-	url := fmt.Sprintf("%s/v2/organizations?inline-relations-depth=1", target.TargetUrl)
+	url := fmt.Sprintf("%s/v2/organizations?inline-relations-depth=2", target.TargetUrl)
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := target.sendRequest(req)
 	if err != nil {

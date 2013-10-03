@@ -11,7 +11,8 @@ type (
 		Guid string `json:"guid"`
 	}
 	domainEntity struct {
-		Name string `json:"name"`
+		Name   string  `json:"name"`
+		Spaces []Space `json:"spaces"`
 	}
 )
 
@@ -23,8 +24,8 @@ type Domain struct {
 func (d Domain) String() string { return fmt.Sprint(d.Name) }
 
 // GetDomains returns a slice of registered domains for given space
-func (target *Target) DomainsGet(spaceGUID string) (domains []Domain, err error) {
-	url := fmt.Sprintf("%s/v2/spaces/%s/domains", target.TargetUrl, spaceGUID)
+func (target *Target) DomainsGet() (domains []Domain, err error) {
+	url := fmt.Sprintf("%s/v2/domains?inline-relations-depth=1", target.TargetUrl)
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := target.sendRequest(req)
 	if err != nil {
