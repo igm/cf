@@ -99,11 +99,11 @@ func (target *Target) AppPush(appGUID string, archetypes []*Archetype) (err erro
 	if err != nil {
 		return
 	}
-	target.appPush(appGUID, buf)
+	target.AppPushArchive(appGUID, buf)
 	return
 }
 
-func (target *Target) appPush(appGUID string, reader io.Reader) (err error) {
+func (target *Target) AppPushArchive(appGUID string, reader io.Reader) (err error) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 	boundary := writer.Boundary()
