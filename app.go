@@ -208,3 +208,24 @@ func (target *Target) AppRoutesGet(appGUID string) (routes []Route, err error) {
 	routes = response.Routes
 	return
 }
+
+type Instance struct {
+	State       string  `json:"state"`
+	Since       float64 `json:"since"`
+	DebugIP     string  `json:"debug_ip"`
+	DebugPort   string  `json:"debug_port"`
+	ConsoleIP   string  `json:"console_ip"`
+	ConsolePort string  `json:"console_port"`
+}
+
+func (target *Target) AppInstances(appGUID string) (instances map[string]Instance, err error) {
+	url := fmt.Sprintf("%s/v2/apps/%s/instances", target.TargetUrl, appGUID)
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, err := target.sendRequest(req)
+	if err != nil {
+		return
+	}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&instances)
+	return
+}

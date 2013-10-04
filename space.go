@@ -20,7 +20,7 @@ type Space struct {
 	spaceEntity   `json:"entity"`
 }
 
-func (s Space) String() string { return fmt.Sprint(s.Name) }
+func (s Space) String() string { return fmt.Sprintf("%s@%s", s.Name, s.Organization.Name) }
 
 func (target *Target) SpacesGet() (spaces []Space, err error) {
 	url := fmt.Sprintf("%s/v2/spaces?inline-relations-depth=1", target.TargetUrl)

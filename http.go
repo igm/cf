@@ -3,6 +3,7 @@ package cf
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 )
@@ -29,7 +30,7 @@ func (target *Target) sendRequest(req *http.Request) (resp *http.Response, err e
 	traceResp(resp)
 
 	if resp.StatusCode == http.StatusUnauthorized {
-		// WARNING!!! io.Seeker.Seek does not work if tracing is enabled, body is replaced in trace
+		// WARNING!!! io.Seeker.Seek does not work if tracing is enabled, body is replaced in trace, we cannot resend request
 		if !Trace || req.Method == "GET" {
 			if seaker, ok := req.Body.(io.Seeker); ok {
 				seaker.Seek(0, 0)
@@ -42,9 +43,14 @@ func (target *Target) sendRequest(req *http.Request) (resp *http.Response, err e
 	}
 
 	if resp.StatusCode >= http.StatusBadRequest {
+		body := new(bytes.Buffer)
+		io.Copy(body, resp.Body)
 		e := new(Error)
-		if json.NewDecoder(resp.Body).Decode(&e) == nil {
+		err = errors.New(string(body.Bytes()))
+		if json.NewDecoder(bytes.NewReader(body.Bytes())).Decode(&e) == nil {
 			err = e
+		} else {
+			err = errors.New(string(body.Bytes()))
 		}
 	}
 	return
