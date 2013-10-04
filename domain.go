@@ -25,7 +25,7 @@ func (d Domain) String() string { return fmt.Sprint(d.Name) }
 
 // GetDomains returns a slice of registered domains for given space
 func (target *Target) DomainsGet() (domains []Domain, err error) {
-	url := fmt.Sprintf("%s/v2/domains?inline-relations-depth=1", target.TargetUrl)
+	url := fmt.Sprintf("%s/v2/domains?inline-relations-depth=2", target.TargetUrl)
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := target.sendRequest(req)
 	if err != nil {
