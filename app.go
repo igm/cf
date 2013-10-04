@@ -138,21 +138,25 @@ func (target *Target) AppPushArchive(appGUID string, reader io.Reader) (err erro
 	return nil
 }
 
-func (target *Target) AppStart(appGUID string) (err error) { return target.appState(appGUID, "STARTED") }
-func (target *Target) AppStop(appGUID string) (err error)  { return target.appState(appGUID, "STOPPED") }
-func (target *Target) appState(appGUID string, state string) (err error) {
+func (target *Target) AppStart(appGUID string) (resp *http.Response, err error) {
+	return target.appState(appGUID, "STARTED")
+}
+func (target *Target) AppStop(appGUID string) (resp *http.Response, err error) {
+	return target.appState(appGUID, "STOPPED")
+}
+func (target *Target) appState(appGUID string, state string) (resp *http.Response, err error) {
 	body, err := json.Marshal(struct {
 		Console bool   `json:"console"`
 		State   string `json:"state"`
 	}{true, state})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	url := fmt.Sprintf("%s/v2/apps/%s", target.TargetUrl, appGUID)
 	req, _ := http.NewRequest("PUT", url, closeReader{bytes.NewReader(body)})
 	req.Header.Set("content-type", "application/json")
-	_, err = target.sendRequest(req)
+	resp, err = target.sendRequest(req)
 	return
 }
 
