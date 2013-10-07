@@ -50,7 +50,7 @@ func (target *Target) sendRequest(req *http.Request) (resp *http.Response, err e
 		if json.NewDecoder(bytes.NewReader(body.Bytes())).Decode(&e) == nil {
 			err = e
 		} else {
-			err = errors.New(string(body.Bytes()))
+			err = &Error{HttpStatusCode: resp.StatusCode, Description: string(body.Bytes())}
 		}
 	}
 	return

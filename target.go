@@ -73,7 +73,7 @@ func (target *Target) getToken(values url.Values) error {
 	if resp.StatusCode != http.StatusOK {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err == nil {
-			err = &Error{resp.StatusCode, string(body), ""}
+			err = &Error{HttpStatusCode: resp.StatusCode, Description: string(body)}
 		}
 		return err
 	}
