@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 )
@@ -231,5 +232,51 @@ func (target *Target) AppInstances(appGUID string) (instances map[string]Instanc
 	}
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&instances)
+	return
+}
+
+type FileInfo struct {
+	Name string
+	Dir  bool
+	Size string
+}
+
+func (target *Target) AppLs(appGUID, instance, dir string) (files []FileInfo, err error) {
+	url := fmt.Sprintf("%s/v2/apps/%s/instances/%s/files/%s/", target.TargetUrl, appGUID, instance, dir)
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, err := target.sendRequest(req)
+	if err != nil {
+		return
+	}
+
+	var filename, size string
+	for {
+		_, err := fmt.Fscanf(resp.Body, "%s %s\n", &filename, &size)
+		if err == io.EOF {
+			break
+		}
+		if size == "-" {
+			files = append(files, FileInfo{filename, true, ""})
+		} else {
+			files = append(files, FileInfo{filename, false, size})
+		}
+	}
+	return
+}
+
+func (target *Target) AppGet(appGUID, instance, file string) (reader io.Reader, err error) {
+	url := fmt.Sprintf("%s/v2/apps/%s/instances/%s/files/%s", target.TargetUrl, appGUID, instance, file)
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, err := target.sendRequest(req)
+	if err != nil {
+		return
+	}
+
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	reader = bytes.NewReader(content)
+	resp.Body.Close()
 	return
 }
