@@ -3,7 +3,6 @@ package cf
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 )
@@ -46,11 +45,9 @@ func (target *Target) sendRequest(req *http.Request) (resp *http.Response, err e
 		body := new(bytes.Buffer)
 		io.Copy(body, resp.Body)
 		e := new(Error)
-		err = errors.New(string(body.Bytes()))
+		err = &Error{HttpStatusCode: resp.StatusCode, ErrorMsg: string(body.Bytes())}
 		if json.NewDecoder(bytes.NewReader(body.Bytes())).Decode(&e) == nil {
 			err = e
-		} else {
-			err = &Error{HttpStatusCode: resp.StatusCode, Description: string(body.Bytes())}
 		}
 	}
 	return

@@ -12,5 +12,11 @@ type Error struct {
 }
 
 func (c *Error) Error() string {
-	return fmt.Sprintf("Error code: [%d]\n%s\nDescription: %s", c.CfCode, c.ErrorMsg, c.Description)
+	errorTmpl := `
+CF code          : [%d]
+Http Status Code : [%d]
+Description      : %s 
+Error msg        : %s
+`
+	return fmt.Sprintf(errorTmpl, c.CfCode, c.HttpStatusCode, c.Description, c.ErrorMsg)
 }
