@@ -23,6 +23,13 @@ type NewApp struct {
 	StackGUID *string `json:"stack_guid"`
 }
 
+type AppUpdate struct {
+	Guid      string `json:"-"`
+	Instances int    `json:"instances"`
+	Memory    int    `json:"memory"`
+	// Buildpack *string `json:"buildpack"`
+}
+
 type appMetadata struct {
 	Guid string `json:"guid"`
 }
@@ -73,6 +80,26 @@ type Archetype struct {
 		io.ReadCloser
 		io.Seeker
 	}
+}
+
+func (target *Target) AppUpdate(app *AppUpdate) (ret *App, err error) {
+	body, err := json.Marshal(app)
+	if err != nil {
+		return
+	}
+
+	url := fmt.Sprintf("%s/v2/apps/%s", target.TargetUrl, app.Guid)
+	req, _ := http.NewRequest("PUT", url, closeReader{bytes.NewReader(body)})
+	req.Header.Set("content-type", "application/json")
+
+	resp, err := target.sendRequest(req)
+	if err != nil {
+		return
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&ret)
+	return
 }
 
 // AppPush creates a zip archive from all the provided atchetypes and upload the archive to the server
